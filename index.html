@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ImmunoHealth — Calculadora de Costos</title>
+  <style>
+    :root {
+      --bg:    #0D1B2A;
+      --card:  #122436;
+      --card2: #0f1e2e;
+      --border:#1e3a52;
+      --cyan:  #00D4AA;
+      --blue:  #1B8CFF;
+      --green: #2ECC71;
+      --red:   #E74C3C;
+      --yellow:#F1C40F;
+      --orange:#E67E22;
+      --ltxt:  #C8DCF0;
+      --dtxt:  #7A9CBC;
+      --white: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--ltxt);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* HEADER */
+    .app-header {
+      background: linear-gradient(135deg, #071422, #0d2138);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .app-header .logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .app-header .logo svg { flex-shrink: 0; }
+    .app-header .logo-text { font-size: 20px; font-weight: 900; color: #fff; line-height: 1; }
+    .app-header .logo-text span { color: var(--cyan); }
+    .app-header .logo-sub { font-size: 10px; color: var(--dtxt); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+    .app-header .badge {
+      font-size: 11px; font-weight: 700;
+      background: var(--cyan); color: var(--bg);
+      padding: 5px 14px; border-radius: 20px;
+    }
+
+    /* MAIN */
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
+
+    .page-title {
+      font-size: 28px; font-weight: 900; color: #fff;
+      margin-bottom: 4px;
+    }
+    .page-title span { color: var(--cyan); }
+    .page-sub { font-size: 13px; color: var(--dtxt); margin-bottom: 28px; }
+
+    /* KPI ROW */
+    .calc-kpi-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .calc-kpi {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      border-top: 3px solid currentColor;
+    }
+    .calc-kpi .ck-num { font-size: 22px; font-weight: 900; line-height: 1.1; }
+    .calc-kpi .ck-lbl { font-size: 10px; color: var(--dtxt); margin-top: 5px; }
+
+    /* TABS */
+    .hidden { display: none !important; }
+    .c-tabs {
+      display: flex; gap: 4px;
+      margin-bottom: 16px;
+      background: var(--card);
+      border-radius: 8px;
+      padding: 4px;
+    }
+    .c-tab-btn {
+      flex: 1; padding: 9px 12px;
+      border: none; border-radius: 6px;
+      background: transparent;
+      color: var(--dtxt);
+      font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: .15s;
+      letter-spacing: .3px;
+    }
+    .c-tab-btn:hover { background: var(--border); color: var(--ltxt); }
+    .c-tab-btn.c-tab-active { background: var(--cyan); color: var(--bg); }
+
+    /* RUBRO */
+    .c-rubro-hdr {
+      background: var(--card);
+      border-radius: 8px 8px 0 0;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      margin-top: 12px;
+    }
+    .c-rubro-hdr:first-child { margin-top: 0; }
+    .c-rubro-body {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    /* TABLE */
+    .c-table { width: 100%; border-collapse: collapse; }
+    .c-table thead tr { background: var(--bg); }
+    .c-table thead th {
+      padding: 7px 10px;
+      font-size: 10px; font-weight: 700;
+      color: var(--dtxt);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      border-bottom: 1px solid var(--border);
+    }
+    .c-table thead th:not(:first-child) { text-align: right; }
+    .c-table tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+    .c-table tbody tr:hover { background: var(--card); }
+    .c-table tbody tr:last-child { border-bottom: none; }
+    .c-table td { padding: 6px 8px; }
+
+    /* INPUTS */
+    .c-input {
+      background: transparent; border: 1px solid transparent;
+      color: var(--ltxt); font-size: 12px;
+      padding: 4px 6px; border-radius: 4px;
+      width: 100%; transition: .15s;
+    }
+    .c-input:hover, .c-input:focus {
+      border-color: var(--border);
+      background: var(--bg);
+      outline: none;
+    }
+    .c-num {
+      background: transparent; border: 1px solid transparent;
+      color: var(--ltxt); font-size: 12px;
+      padding: 4px 6px; border-radius: 4px;
+      text-align: right; width: 100%;
+      transition: .15s;
+    }
+    .c-num:hover, .c-num:focus {
+      border-color: var(--border);
+      background: var(--bg);
+      outline: none;
+    }
+    .c-qty { width: 52px; text-align: center; }
+    .c-sub { text-align: right; font-weight: 700; color: var(--cyan); font-size: 12px; }
+    .c-del {
+      background: transparent; border: none;
+      color: var(--dtxt); cursor: pointer;
+      font-size: 13px; padding: 4px 6px;
+      border-radius: 4px; transition: .15s;
+    }
+    .c-del:hover { background: var(--red)22; color: var(--red); }
+    .c-add-btn {
+      display: block; width: 100%;
+      background: transparent;
+      border: none; border-top: 1px dashed var(--border);
+      color: var(--dtxt); font-size: 11px;
+      padding: 9px 14px; cursor: pointer;
+      text-align: left; transition: .15s;
+    }
+    .c-add-btn:hover { background: var(--border)44; color: var(--cyan); }
+
+    /* GRAND TOTAL */
+    .c-grand {
+      display: flex; justify-content: space-between; align-items: center;
+      background: linear-gradient(135deg, #071c2e, #0a2840);
+      border: 1px solid var(--cyan);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-top: 4px;
+    }
+    .c-grand-lbl { font-size: 12px; font-weight: 800; color: var(--ltxt); letter-spacing: .5px; }
+    .c-grand-val { font-size: 24px; font-weight: 900; color: var(--cyan); }
+
+    /* ANAL */
+    .c-anal-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .c-anal-row:last-child { border-bottom: none; }
+    .c-anal-row span { color: var(--dtxt); }
+
+    /* FOOTER */
+    .app-footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 11px;
+      color: var(--dtxt);
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+    .app-footer strong { color: var(--cyan); }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="logo">
+      <svg viewBox="0 0 60 60" width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="30" cy="30" r="28" fill="rgba(0,212,170,.08)" stroke="rgba(0,212,170,.3)" stroke-width="1.5"/>
+        <rect x="24" y="10" width="12" height="28" rx="3" fill="#00D4AA"/>
+        <rect x="16" y="18" width="28" height="12" rx="3" fill="#00D4AA"/>
+        <path d="M11 44 Q11 34 18 32 L24 31 Q26 30 27 33 L28 35 Q30 31 32 30 Q36 29 37 33 L38 35 Q40 31 43 31 Q47 30 47 35 L47 44 Q47 53 30 55 Q13 53 11 44 Z" fill="#00D4AA" opacity="0.7"/>
+      </svg>
+      <div>
+        <div class="logo-text"><span>Immuno</span>Health</div>
+        <div class="logo-sub">Clínica de Vacunación</div>
+      </div>
+    </div>
+    <div class="badge">Calculadora de Costos · 2026</div>
+  </header>
+
+  <main class="main">
+    <div class="page-title"><span>Calculadora</span> de Costos</div>
+    <p class="page-sub">Edita cualquier campo en tiempo real · Los totales se actualizan automáticamente · Puebla, México · 2026</p>
+
+    <!-- KPIs vivos -->
+    <div class="calc-kpi-row">
+      <div class="calc-kpi" style="color:var(--cyan)">
+        <div class="ck-num" id="ckpi-inv">—</div>
+        <div class="ck-lbl">Inversión inicial</div>
+      </div>
+      <div class="calc-kpi" style="color:var(--red)">
+        <div class="ck-num" id="ckpi-mes">—</div>
+        <div class="ck-lbl">Costo fijo mensual</div>
+      </div>
+      <div class="calc-kpi" style="color:var(--green)">
+        <div class="ck-num" id="ckpi-cap">—</div>
+        <div class="ck-lbl">Capital sugerido (inv + 5 meses)</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="c-tabs">
+      <button class="c-tab-btn c-tab-active" data-tab="inv" onclick="showCalcTab('inv',this)">Inversión Inicial</button>
+      <button class="c-tab-btn" data-tab="gas" onclick="showCalcTab('gas',this)">Gastos Fijos Mensuales</button>
+      <button class="c-tab-btn" data-tab="anal" onclick="showCalcTab('anal',this)">Análisis</button>
+    </div>
+
+    <div id="ctab-inv"></div>
+    <div id="ctab-gas" class="hidden"></div>
+    <div id="ctab-anal" class="hidden"></div>
+  </main>
+
+  <footer class="app-footer">
+    <strong>ImmunoHealth</strong> · Calculadora de Costos · Datos basados en cotizaciones Salubox 2025 · Sujeto a negociación con proveedores
+  </footer>
+
+<script>
+  const calcDB = {
+    rubros: [
+      { id:'frio', name:'Cadena de Frío', items:[
+        { name:'Refrigerador médico 2–8°C (COFEPRIS)', qty:2, pu:34000 },
+        { name:'Termómetro digital calibrado',          qty:2, pu:1800  },
+        { name:'Data logger de temperatura',            qty:1, pu:4500  },
+        { name:'Cajas térmicas de transporte',          qty:2, pu:1450  },
+      ]},
+      { id:'mobiliario', name:'Mobiliario Médico', items:[
+        { name:'Sillón de vacunación',           qty:3, pu:2000  },
+        { name:'Mesa auxiliar de acero inox.',   qty:3, pu:2500  },
+        { name:'Escritorio clínico + silla',     qty:1, pu:9000  },
+        { name:'Biombo / separador cubículo',    qty:3, pu:1200  },
+      ]},
+      { id:'recepcion', name:'Recepción y Sistemas', items:[
+        { name:'Escritorio de recepción',        qty:1, pu:7000  },
+        { name:'Sillas sala de espera (lote 6)', qty:1, pu:9000  },
+        { name:'Computadora de escritorio',      qty:1, pu:20000 },
+        { name:'Impresora multifuncional',       qty:1, pu:3000  },
+      ]},
+      { id:'insumos', name:'Insumos Médicos (stock inicial)', items:[
+        { name:'Jeringas 1ml y 3ml + agujas',     qty:1,  pu:8000 },
+        { name:'Guantes nitrilo (10 cajas)',       qty:10, pu:450  },
+        { name:'Contenedores RPBI punzocortantes', qty:3,  pu:500  },
+        { name:'Alcohol 96° + gasas + algodón',   qty:1,  pu:4500 },
+        { name:'Gel antibacterial + cubrebocas',  qty:1,  pu:500  },
+      ]},
+      { id:'tramites', name:'Permisos y Trámites Legales', items:[
+        { name:'Constitución SA de CV (notaría)',   qty:1, pu:15000 },
+        { name:'Aviso COFEPRIS (formato 05-036)',   qty:1, pu:5000  },
+        { name:'Diseño de marca / branding',        qty:1, pu:25000 },
+        { name:'Responsable sanitario (honorarios)',qty:1, pu:10000 },
+        { name:'Contratos RPBI + legales',          qty:1, pu:8000  },
+        { name:'RFC, alta IMSS, Sec. Finanzas',     qty:1, pu:57000 },
+      ]},
+      { id:'local', name:'Adecuación del Local', items:[
+        { name:'Remodelación / obra menor',        qty:1, pu:250000 },
+        { name:'Instalación eléctrica especial',   qty:1, pu:30000  },
+        { name:'Señalización y acabados',          qty:1, pu:20000  },
+        { name:'Renta depósito (×2) + 1er mes',    qty:1, pu:120000 },
+        { name:'Planta eléctrica / UPS',           qty:1, pu:20000  },
+      ]},
+      { id:'inventario', name:'Inventario Inicial de Vacunas', items:[
+        { name:'Vacunas esquema básico (cartilla)',   qty:1, pu:150000 },
+        { name:'Vacunas viajero y adicionales',       qty:1, pu:200000 },
+        { name:'Biológicos alta rotación (refuerzo)', qty:1, pu:100000 },
+      ]},
+    ],
+    nomina: [
+      { name:'Médico encargado',        qty:1, pu:22000 },
+      { name:'Enfermero/a vacunador/a', qty:1, pu:14000 },
+      { name:'Recepcionista',           qty:1, pu:10000 },
+      { name:'Limpieza (medio tiempo)', qty:1, pu:6000  },
+    ],
+    gastos: [
+      { name:'Renta del local',            qty:1, pu:40000 },
+      { name:'Electricidad',               qty:1, pu:1500  },
+      { name:'Agua',                       qty:1, pu:400   },
+      { name:'Internet / telefonía',       qty:1, pu:600   },
+      { name:'Insumos reposición mensual', qty:1, pu:6000  },
+      { name:'RPBI + publicidad digital',  qty:1, pu:2000  },
+    ],
+  };
+
+  function cfmt(n){ return '$'+Math.abs(Math.round(n)).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function cRTot(items){ return items.reduce((s,i)=>s+i.qty*i.pu,0); }
+  function cInvTot(){ return calcDB.rubros.reduce((s,r)=>s+cRTot(r.items),0); }
+  function cNomBase(){ return cRTot(calcDB.nomina); }
+  function cNomImss(){ return Math.round(cNomBase()*0.12); }
+  function cNomTot(){ return cNomBase()+cNomImss(); }
+  function cGasTot(){ return cRTot(calcDB.gastos); }
+  function cMesTot(){ return cNomTot()+cGasTot(); }
+
+  function refreshCalcKPIs(){
+    const inv=cInvTot(), mes=cMesTot(), cap=inv+mes*5;
+    document.getElementById('ckpi-inv').textContent=cfmt(inv);
+    document.getElementById('ckpi-mes').textContent=cfmt(mes);
+    document.getElementById('ckpi-cap').textContent=cfmt(cap);
+  }
+
+  function cGetItems(id){
+    if(id==='nomina') return calcDB.nomina;
+    if(id==='gastos') return calcDB.gastos;
+    return (calcDB.rubros.find(r=>r.id===id)||{items:[]}).items;
+  }
+
+  function cUpdate(tableId,idx,field,val){
+    const items=cGetItems(tableId);
+    if(items[idx]) items[idx][field]=(field==='name'?val:+val);
+    const el=document.getElementById('cst-'+tableId+'-'+idx);
+    if(el) el.textContent=cfmt(items[idx].qty*items[idx].pu);
+    if(tableId==='nomina'){
+      const t=document.getElementById('cnom-tot'); if(t) t.textContent=cfmt(cNomTot());
+      const i=document.getElementById('cnom-imss'); if(i) i.textContent='IMSS/prestaciones (12%): '+cfmt(cNomImss());
+    } else if(tableId==='gastos'){
+      const t=document.getElementById('cgas-tot'); if(t) t.textContent=cfmt(cGasTot());
+    } else {
+      calcDB.rubros.forEach(r=>{
+        const sub=cRTot(r.items),tot=cInvTot();
+        const te=document.getElementById('crtot-'+r.id); if(te) te.textContent=cfmt(sub);
+        const pe=document.getElementById('crpct-'+r.id); if(pe) pe.textContent=(tot>0?(sub/tot*100).toFixed(1):0)+'%';
+      });
+      const g=document.getElementById('cinv-grand'); if(g) g.textContent=cfmt(cInvTot());
+    }
+    refreshCalcKPIs();
+  }
+
+  function cDel(tableId,idx){
+    cGetItems(tableId).splice(idx,1);
+    renderCalcTab(currentCalcTab);
+  }
+  function cAdd(tableId){
+    cGetItems(tableId).push({name:'Nuevo concepto',qty:1,pu:0});
+    renderCalcTab(currentCalcTab);
+  }
+
+  function cRows(items,tableId){
+    return items.map((item,idx)=>`
+      <tr>
+        <td><input class="c-input" value="${item.name.replace(/"/g,'&quot;')}" onchange="cUpdate('${tableId}',${idx},'name',this.value)"></td>
+        <td style="text-align:center"><input class="c-num c-qty" type="number" min="0" value="${item.qty}" onchange="cUpdate('${tableId}',${idx},'qty',this.value)"></td>
+        <td><input class="c-num" type="number" min="0" step="500" value="${item.pu}" onchange="cUpdate('${tableId}',${idx},'pu',this.value)"></td>
+        <td class="c-sub" id="cst-${tableId}-${idx}">${cfmt(item.qty*item.pu)}</td>
+        <td style="text-align:center"><button class="c-del" onclick="cDel('${tableId}',${idx})">✕</button></td>
+      </tr>`).join('');
+  }
+
+  function cHead(){
+    return `<thead><tr>
+      <th style="text-align:left;padding:7px 10px;">Concepto</th>
+      <th style="text-align:center;width:50px;">Cant.</th>
+      <th style="text-align:right;width:115px;">Precio unit.</th>
+      <th style="text-align:right;width:115px;">Subtotal</th>
+      <th style="width:28px;"></th>
+    </tr></thead>`;
+  }
+
+  let currentCalcTab='inv';
+  function showCalcTab(tab,btn){
+    currentCalcTab=tab;
+    ['inv','gas','anal'].forEach(t=>document.getElementById('ctab-'+t).classList.toggle('hidden',t!==tab));
+    document.querySelectorAll('.c-tab-btn').forEach(b=>b.classList.toggle('c-tab-active',b.dataset.tab===tab));
+    renderCalcTab(tab);
+  }
+
+  function renderCalcTab(tab){
+    if(tab==='inv'){
+      let html='';
+      calcDB.rubros.forEach(r=>{
+        const sub=cRTot(r.items),tot=cInvTot();
+        html+=`
+        <div class="c-rubro-hdr">
+          <span style="font-size:12px;font-weight:800;color:var(--ltxt);">${r.name}</span>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <span style="font-size:10px;background:var(--border);padding:2px 8px;border-radius:10px;color:var(--dtxt);" id="crpct-${r.id}">${(tot>0?(sub/tot*100).toFixed(1):0)}%</span>
+            <span style="font-size:13px;font-weight:700;color:var(--cyan);" id="crtot-${r.id}">${cfmt(sub)}</span>
+          </div>
+        </div>
+        <div class="c-rubro-body">
+          <table class="c-table">${cHead()}<tbody>${cRows(r.items,r.id)}</tbody></table>
+          <button class="c-add-btn" onclick="cAdd('${r.id}')">＋ Agregar concepto</button>
+        </div>`;
+      });
+      html+=`<div class="c-grand"><span class="c-grand-lbl">TOTAL INVERSIÓN INICIAL</span><span class="c-grand-val" id="cinv-grand">${cfmt(cInvTot())}</span></div>`;
+      document.getElementById('ctab-inv').innerHTML=html;
+    }
+    else if(tab==='nom'){
+      document.getElementById('ctab-nom').innerHTML=`
+        <div class="c-rubro-hdr">
+          <span style="font-size:12px;font-weight:800;color:var(--ltxt);">Sueldos Mensuales</span>
+          <span style="font-size:13px;font-weight:700;color:var(--blue);" id="cnom-tot">${cfmt(cNomTot())}</span>
+        </div>
+        <div class="c-rubro-body" style="margin-bottom:0;">
+          <table class="c-table">${cHead()}<tbody>${cRows(calcDB.nomina,'nomina')}</tbody></table>
+          <button class="c-add-btn" onclick="cAdd('nomina')">＋ Agregar puesto</button>
+          <div style="padding:8px 14px;font-size:11px;color:var(--dtxt);border-top:1px solid var(--border);" id="cnom-imss">IMSS / prestaciones (12%): ${cfmt(cNomImss())}</div>
+        </div>`;
+    }
+    else if(tab==='gas'){
+      document.getElementById('ctab-gas').innerHTML=`
+        <div class="c-rubro-hdr">
+          <span style="font-size:12px;font-weight:800;color:var(--ltxt);">Nómina Mensual</span>
+          <span style="font-size:13px;font-weight:700;color:var(--blue);" id="cnom-tot">${cfmt(cNomTot())}</span>
+        </div>
+        <div class="c-rubro-body">
+          <table class="c-table">${cHead()}<tbody>${cRows(calcDB.nomina,'nomina')}</tbody></table>
+          <button class="c-add-btn" onclick="cAdd('nomina')">＋ Agregar puesto</button>
+          <div style="padding:8px 14px;font-size:11px;color:var(--dtxt);border-top:1px solid var(--border);" id="cnom-imss">IMSS / prestaciones (12%): ${cfmt(cNomImss())}</div>
+        </div>
+        <div class="c-rubro-hdr">
+          <span style="font-size:12px;font-weight:800;color:var(--ltxt);">Gastos Operativos Fijos</span>
+          <span style="font-size:13px;font-weight:700;color:var(--red);" id="cgas-tot">${cfmt(cGasTot())}</span>
+        </div>
+        <div class="c-rubro-body" style="margin-bottom:0;">
+          <table class="c-table">${cHead()}<tbody>${cRows(calcDB.gastos,'gastos')}</tbody></table>
+          <button class="c-add-btn" onclick="cAdd('gastos')">＋ Agregar gasto</button>
+        </div>
+        <div class="c-grand">
+          <span class="c-grand-lbl">TOTAL MENSUAL (Nómina + Operativos)</span>
+          <span class="c-grand-val" style="color:var(--red);">${cfmt(cMesTot())}</span>
+        </div>`;
+    }
+    else if(tab==='anal'){
+      const inv=cInvTot(),mes=cMesTot(),cap=inv+mes*5;
+      document.getElementById('ctab-anal').innerHTML=`
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div style="background:var(--card2);border-radius:10px;padding:20px;border:1px solid var(--border);">
+            <div style="font-size:11px;font-weight:800;color:var(--dtxt);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;">Desglose del costo mensual</div>
+            <div class="c-anal-row"><span>Nómina base (sueldos)</span><strong style="color:var(--blue);">${cfmt(cNomBase())}</strong></div>
+            <div class="c-anal-row"><span>IMSS / prestaciones (12%)</span><strong style="color:var(--blue);">${cfmt(cNomImss())}</strong></div>
+            <div class="c-anal-row"><span>Gastos fijos operativos</span><strong style="color:var(--red);">${cfmt(cGasTot())}</strong></div>
+            <div class="c-anal-row" style="border-top:2px solid var(--cyan);margin-top:6px;padding-top:12px;">
+              <span style="font-weight:800;color:var(--white);font-size:13px;">TOTAL MENSUAL</span>
+              <strong style="font-size:20px;color:var(--cyan);">${cfmt(mes)}</strong>
+            </div>
+          </div>
+          <div style="background:var(--card2);border-radius:10px;padding:20px;border:1px solid var(--border);">
+            <div style="font-size:11px;font-weight:800;color:var(--dtxt);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;">Capital necesario antes de abrir</div>
+            <div class="c-anal-row"><span>Inversión inicial</span><strong style="color:var(--cyan);">${cfmt(inv)}</strong></div>
+            <div class="c-anal-row"><span>Reserva operativa (5 meses)</span><strong style="color:var(--yellow);">${cfmt(mes*5)}</strong></div>
+            <div class="c-anal-row" style="border-top:2px solid var(--green);margin-top:6px;padding-top:12px;">
+              <span style="font-weight:800;color:var(--white);font-size:13px;">CAPITAL TOTAL SUGERIDO</span>
+              <strong style="font-size:22px;color:var(--green);">${cfmt(cap)}</strong>
+            </div>
+          </div>
+        </div>`;
+    }
+    refreshCalcKPIs();
+  }
+
+  // Inicializar
+  renderCalcTab('inv');
+  refreshCalcKPIs();
+</script>
+</body>
+</html>
